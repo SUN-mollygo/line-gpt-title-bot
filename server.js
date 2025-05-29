@@ -1,7 +1,7 @@
 // server.js
 import express from 'express';
 import { config } from 'dotenv';
-import { Configuration, OpenAIApi } from 'openai';
+import OpenAI from 'openai';
 import bodyParser from 'body-parser';
 import axios from 'axios';
 
@@ -11,9 +11,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(bodyParser.json());
 
-const openai = new OpenAIApi(new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-}));
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
 
 app.post('/webhook', async (req, res) => {
   const events = req.body.events;
@@ -25,7 +25,7 @@ app.post('/webhook', async (req, res) => {
       const replyToken = event.replyToken;
 
       try {
-        const completion = await openai.createChatCompletion({
+        const completion = await openai.chat.completions.create({
           model: 'gpt-4o',
           messages: [
             {
@@ -46,13 +46,9 @@ app.post('/webhook', async (req, res) => {
           temperature: 0.7
         });
 
-        const titles = completion.data.choices[0].message.content.trim();
+        const titles = completion.choices[0].message.content.trim();
 
-        const replyText = `以下是為你產出的5個短影音標題：
-
-${titles}
-
-📌 提醒你：這些標題已經幫你完成90%的工作，但最終的那10%，還是得靠你動動腦微調一下，這樣效果才會最好！`;
+        const replyText = `以下是為你產出的5個短影音標題：\n\n${titles}\n\n📌 提醒你：這些標題已經幫你完成90%的工作，但最終的那10%，還是得靠你動動腦微調一下，這樣效果才會最好！`;
 
         await axios.post('https://api.line.me/v2/bot/message/reply', {
           replyToken,
@@ -65,7 +61,7 @@ ${titles}
         });
 
       } catch (err) {
-        console.error('GPT or LINE error:', err);
+        console.error('GPT or LINE error:', err.response?.data || err.message);
       }
     }
   }
