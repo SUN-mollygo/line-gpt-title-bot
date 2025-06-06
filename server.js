@@ -52,7 +52,7 @@ async function detectIntent(text) {
 
   try {
     const fallback = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-4-turbo',
       messages: [
         {
           role: 'system',
@@ -94,7 +94,7 @@ async function handleIntent(intent, userMessage, userId) {
 
     default:
       const clarification = await openai.chat.completions.create({
-        model: 'gpt-4o',
+        model: 'gpt-4-turbo',
         messages: [
           {
             role: 'system',
@@ -133,7 +133,7 @@ async function generateTitle(text, isRegeneration = false) {
 請直接輸出 5 則候選標題即可，無需解釋原因。${isRegeneration ? '\n\n⚠️ 本次請從不同觀點或語感切入，避免與上一輪太相似。' : ''}`;
 
   const completion = await openai.chat.completions.create({
-    model: 'gpt-4o',
+    model: 'gpt-4-turbo',
     messages: [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: text }
